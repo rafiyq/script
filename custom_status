@@ -1,0 +1,23 @@
+#!/bin/sh
+print_vol() {
+    amixer -M get Master |\
+        awk -F"[][]" '/Mono.+/ {print $6=="off" ?\
+        "muted": "vol "$2}'
+}
+
+print_bat() {
+    status=$(cat /sys/class/power_supply/BAT0/status)
+    level=$(cat /sys/class/power_supply/BAT0/capacity)
+    if [ $status = "Charging" ]
+    then
+        printf 'char %d%%' "$level"
+    else
+        printf 'bat %d%%' "$level"
+    fi
+}
+
+print_date() {
+    date +'%d-%m-%Y %l:%M %P'
+} 
+
+printf '%s | %s | %s\n' "$(print_vol)" "$(print_bat)" "$(print_date)"
