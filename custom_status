@@ -14,7 +14,6 @@ print_ip() {
         print $3}'
 }
 
-
 print_net() {
     ip=$(print_ip)
     wifi=$(print_wifi)
@@ -33,7 +32,7 @@ print_net() {
 print_mem() {
     awk '/Mem/{print$2}' /proc/meminfo |\
     awk 'BEGIN {RS = "";FS = "\n"} ;\
-        {printf("%.2f/%.2f gB\n", ($1-$3)/1048576, $1/1048576)}'
+        {printf("%.2f/%.2f gB\n", ($1-$3)/1048576-0.285, $1/1048576)}'
 }
 
 print_temp() {
