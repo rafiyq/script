@@ -42,7 +42,7 @@ print_temp() {
 print_vol() {
     # TODO: simplify to one command
     ismuted=$(pactl list sinks | awk '/Mute/ {print $2}')
-    vol=$(pactl list sinks | awk '/\tVolume/ {print $5}')
+    vol=$(pactl list sinks | awk '/\tVolume/ {print $5}' | tr "\n" " ")
     if [ $ismuted = "yes" ]
     then
         printf 'muted'
