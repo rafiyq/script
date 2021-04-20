@@ -1,11 +1,12 @@
 #!/bin/sh -e
 
-#eval $(ssh-agent)
+eval $(ssh-agent)
 
 export XDG_SESSION_TYPE=wayland
 export XDG_CURRENT_DESKTOP=sway
 export _JAVA_AWT_WM_NONREPARENTING=1
 export MOZ_ENABLE_WAYLAND=1
+export GDK_BACKEND=wayland
 
 if [ -z "$XDG_RUNTIME_DIR" ]; then
 	export XDG_RUNTIME_DIR=/tmp
