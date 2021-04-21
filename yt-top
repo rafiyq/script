@@ -1,3 +1,6 @@
 #!/bin/sh
+ytdl_path=~/.local/bin/youtube-dl
+ytdl_addr=https://youtube-dl.org/downloads/latest/youtube-dl
+[ ! -f $ytdl_path ] && wget -O $ytdl_path $ytdl_addr 
 
-python3 ~/Downloads/youtube-dl -f 'bestvideo+bestaudio' --embed-subs --all-subs $1
+python3 $ytdl_path -f 'bestvideo+bestaudio' --embed-subs --all-subs $1
