@@ -1,0 +1,1 @@
+/home/rafiyq/sources/configuration/emacs/emacs.sh

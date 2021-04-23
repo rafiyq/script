@@ -1,0 +1,3 @@
+#!/bin/sh
+~/.local/bin/emacs.sh
+/usr/bin/emacs
