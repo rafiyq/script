@@ -1,3 +1,0 @@
-#!/bin/sh
-~/.local/bin/spacemacs-develop.sh
-/usr/bin/emacs

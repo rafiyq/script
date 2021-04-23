@@ -1,1 +1,0 @@
-/home/rafiyq/sources/configuration/emacs/spacemacs-master.sh
