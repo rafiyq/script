@@ -1,7 +1,0 @@
-#!/bin/sh
-rm -rf ~/.emacs.d
-mkdir -pv ~/.config/emacs
-ln -sfv /home/rafiyq/sources/configuration/emacs/early-init.el ~/.config/emacs/
-ln -sfv /home/rafiyq/sources/configuration/emacs/init.el ~/.config/emacs/
-ln -sfv ~/.config/emacs ~/.emacs.d
-/usr/bin/emacs
