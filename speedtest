@@ -1,0 +1,14 @@
+#!/bin/sh
+
+[ ! -f $HOME/.local/bin/speedtest.py ] && wget \
+  https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+
+st=$HOME/.local/bin/speedtest.py
+logs="$HOME/Documents/logs/speedtest"
+interval=600
+
+while true
+do
+    python3 $st --csv >> $logs
+    sleep $interval
+done
