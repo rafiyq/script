@@ -1,6 +1,0 @@
-#!/bin/sh
-ytdl_path=~/.local/bin/youtube-dl
-ytdl_addr=https://youtube-dl.org/downloads/latest/youtube-dl
-[ ! -f $ytdl_path ] && wget -O $ytdl_path $ytdl_addr && chmod +x $ytdl_path
-
-$ytdl_path -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' --embed-subs $1

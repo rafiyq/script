@@ -1,0 +1,27 @@
+#!/bin/sh
+py=/usr/bin/python
+ytdl_path=~/.local/bin/youtube-dl
+ytdl_addr=https://youtube-dl.org/downloads/latest/youtube-dl
+[ ! -f $ytdl_path ] && wget -O $ytdl_path $ytdl_addr
+
+case $1 in
+    "best")
+        echo "best video(mp4) + best audio(m4a) + substitle"
+        $py $ytdl_path -f \
+            'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' \
+            --embed-subs $2
+        ;;
+    "top")
+        echo "best video + best audio + substitle"
+        $py $ytdl_path -f 'bestvideo+bestaudio' --embed-subs --all-subs $2
+        ;;
+    "thumbnail")
+        echo "Download thumbnail"
+        $py $ytdl_path --write-thumbnail --skip-download $2
+        ;;
+    *)
+        echo "youtube-dl"
+        $py $ytdl_path $*
+        ;;
+esac
+
