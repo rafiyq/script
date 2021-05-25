@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import shutil
+
+def matchFilm(s):
+    '''
+    Given string s,
+    Return true if s match conventional film name
+    '''
+    psarips = re.fullmatch(r'(.*?)(\d\d\d\d)(.*?)(\.x265\.HEVC\-PSA)(.mp4|.mkv|.rar|.zip)$', s)
+    return psarips
+
+def matchSeries(s):
+    '''
+    Given string s,
+    Return true if s match conventional tv-series name
+    '''
+    return re.fullmatch(r'(.*?)(S\d\dE\d\d)(.*?)(.mp4|.mkv|.rar|.zip)$', s)
+
+def createDirIfNotExist(dir_path):
+    '''
+    Given directory path,
+    Check if directory exist, if not create it.
+    '''
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
+
+
+download_dir = os.path.expanduser("~/Downloads")
+seri_dir = download_dir + "/Seri"
+film_dir = download_dir + "/Film"
+
+createDirIfNotExist(film_dir)
+createDirIfNotExist(seri_dir)
+
+for filename in os.listdir(download_dir):
+    if matchFilm(filename) or matchSeries(filename):
+       # new_location = shutil.move(filename, destination_path)
+        print(download_dir + "/" + filename)
