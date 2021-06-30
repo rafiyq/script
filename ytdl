@@ -9,15 +9,23 @@ case $1 in
         echo "best video(mp4) + best audio(m4a) + substitle"
         $py $ytdl_path -f \
             'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' \
-            --embed-subs $2
+            --write-sub --write-auto-sub --sub-lang en,id \
+            --convert-subs=srt --embed-subs $2
         ;;
     "top")
         echo "best video + best audio + substitle"
-        $py $ytdl_path -f 'bestvideo+bestaudio' --embed-subs --all-subs $2
+        $py $ytdl_path -f \
+            'bestvideo+bestaudio' --write-sub --write-auto-sub \
+            --sub-lang en,id --convert-subs=srt --embed-subs $2
         ;;
     "thumbnail")
         echo "Download thumbnail"
         $py $ytdl_path --write-thumbnail --skip-download $2
+        ;;
+    "update")
+        echo "Updating youtube-dl..."
+        rm $ytdl_path
+        wget -O $ytdl_path $ytdl_addr
         ;;
     *)
         echo "youtube-dl"
