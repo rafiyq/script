@@ -70,13 +70,13 @@ def createSimilarStr(a, b):
             break
     return sim
 
-def extract(file_path, directory):
+def extract(file_path, destination):
     '''
     Given file and destination path,
     extract file in given directory
     '''
     sevzip = '/usr/bin/7z'
-    print(f"Extracting: {file_path} into {directory}...")
+    print(f"Extracting: {file_path} into {destination}...")
 
     process = subprocess.Popen([sevzip, "x", file_path, "-o" + directory])
     status  = os.waitpid(process.pid, 0)[1]
@@ -93,10 +93,10 @@ video_dir = os.path.join(download_dir, "Videos")
 
 for file_name in os.listdir(download_dir):
     file_path = os.path.join(download_dir, file_name)
-    if matchFilm(file_name):
-        moveFile(file_path, film_dir)
-    elif matchSeries(file_name):
+    if matchSeries(file_name):
         moveFile(file_path, series_dir)
+    elif matchFilm(file_name):
+        moveFile(file_path, film_dir)
     elif matchVideo(file_name):
         moveFile(file_path, video_dir)
 
@@ -104,6 +104,11 @@ for filename in os.listdir(series_dir):
     filename_path = os.path.join(series_dir, filename)
     if matchArchive(filename):
         extract(filename_path, series_dir)
+
+for filename in os.listdir(film_dir):
+    filename_path = os.path.join(film_dir, filename)
+    if matchArchive(filename):
+        extract(filename_path, film_dir)
 
 holder = ''
 try:
