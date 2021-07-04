@@ -3,3 +3,17 @@ spacemacs
 spacemacs-term
 f2py*
 speedtest.py
+#python and jupyter
+jupyter*
+__pycache__/
+iptest
+iptest3
+ipython
+ipython3
+jlpm
+jsonschema
+pybabel
+pygmentize
+pyjson5
+send2trash
+wsdump.py
