@@ -18,6 +18,13 @@ case $1 in
             'bestvideo+bestaudio' --write-sub --write-auto-sub \
             --sub-lang en,id --convert-subs=srt --embed-subs $2
         ;;
+    "music")
+        echo "downloading music..."
+        $py $ytdl_path -o %\(track\)s\ -\ %\(artist\)s.%\(ext\)s \
+        -f bestaudio --extract-audio --audio-format mp3 --audio-quality 0 \
+        --embed-thumbnail --add-metadata --metadata-from-title %\(track\)s\ -\ %\(title\)s \
+        $2
+        ;;
     "thumbnail")
         echo "Download thumbnail"
         $py $ytdl_path --write-thumbnail --skip-download $2
