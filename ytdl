@@ -22,7 +22,7 @@ case $1 in
         echo "downloading music..."
         $py $ytdl_path -o %\(track\)s\ -\ %\(artist\)s.%\(ext\)s \
         -f bestaudio --extract-audio --audio-format mp3 --audio-quality 0 \
-        --embed-thumbnail --add-metadata --metadata-from-title %\(track\)s\ -\ %\(title\)s \
+        --embed-thumbnail --add-metadata --metadata-from-title %\(track\)s\ -\ %\(artist\)s \
         $2
         ;;
     "thumbnail")
