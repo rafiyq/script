@@ -1,5 +1,7 @@
 #!/bin/sh
 
+[ -z "$ZDOTDIR" ] && export ZDOTDIR=$HOME/.config/zsh
+
 case $1 in
     "grml")
         ln -sf $HOME/.config/grml/zsh $ZDOTDIR/.zshrc
