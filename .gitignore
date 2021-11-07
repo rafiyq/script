@@ -36,4 +36,13 @@ tiff2fsspec
 tiffcomment
 tifffile
 ttx
-
+fixup_speech_v1_keywords.py
+fixup_speech_v1p1beta1_keywords.py
+fixup_translate_v3_keywords.py
+fixup_translate_v3beta1_keywords.py
+pyrsa-decrypt
+pyrsa-encrypt
+pyrsa-keygen
+pyrsa-priv2pub
+pyrsa-sign
+pyrsa-verify
