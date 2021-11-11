@@ -21,4 +21,4 @@ then
     /usr/bin/emacs -nw
 else
     /usr/bin/emacs
-
+fi
