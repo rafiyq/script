@@ -1,7 +1,7 @@
 #!/bin/sh
 py=/usr/bin/python3
-ytdl_path=$HOME/.local/bin/youtube-dl
-ytdl_addr=https://youtube-dl.org/downloads/latest/youtube-dl
+ytdl_path=$HOME/.local/bin/yt-dlp
+#ytdl_addr=https://youtube-dl.org/downloads/latest/youtube-dl
 [ ! -f $ytdl_path ] && wget -O $ytdl_path $ytdl_addr
 
 case $1 in
