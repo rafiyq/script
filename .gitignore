@@ -52,3 +52,5 @@ code
 code-insiders
 powershell
 sublime_text
+go
+go/*
