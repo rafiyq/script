@@ -1,4 +1,26 @@
 #!/bin/sh
-ffmpeg -i $1 -f srt -i $2 -c:v copy -c:a copy -c:s mov_text -metadata:s:s:0 language=eng outfile.mp4
-gio trash $1 $2
-mv outfile.mp4 $1
+
+# save video name to variable
+video=$1
+
+if [ -z $2 ]
+then
+    base_name=$(echo $video | rev | cut -f 2- -d '.' | rev)
+    total_subs=$(find "$base_name"*.srt | wc -l)
+    if [ $total_subs -eq 1 ]
+    then
+        subs=$(find "$base_name"*.srt)
+    else
+        echo "There're multiple substitle"
+        exit 1
+    fi
+else  
+    subs=$2
+fi
+
+ffmpeg -i "$video" -f srt -i "$subs" -c:v copy -c:a copy -c:s mov_text -metadata:s:s:0 language=eng outfile.mp4
+gio trash "$video" "$subs"
+mv outfile.mp4 "$video"
+
+#echo "$video"
+#echo "$subs"
