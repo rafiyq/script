@@ -1,15 +1,27 @@
-#!/bin/bash
-zshenv_dir=$HOME/.zshenv
+#!/bin/sh
+zshenv_path=$HOME/.zshenv
 zsh_dir=$HOME/.config/zsh
 zshrc_path=$zsh_dir/.zshrc
 
 if [ ! -f $zshenv ] 
 then
-    ln -sf $HOME/.config/zsh/zshenv $zshenv
+    ln -sf $zsh_dir/zshenv $zshenv_path
 fi
 
-prefix=$(dirname $(readlink -f $0))
-[ ! -z "$1" ] && prefix=$1 
+#prefix=$(dirname $(readlink -f $0))
+#[ ! -z "$1" ] && prefix=$1 
+newclone ()
+{
+    plug_url=$1
+    plug_name=${plug_url##*/}
+    plug_dir=$zsh_dir/plugins/$plug_name
+    if [ ! -d $plug_dir ]
+    then
+        git clone $plug_url $plug_dir
+    else
+        echo "$plug_dir already exist."
+    fi
+}
 
 ohmyzsh ()
 {
@@ -19,14 +31,22 @@ ohmyzsh ()
     [ ! -d $ohmyz_dir ] && git clone $ohmyz_url $ohmyz_dir 
 
     ## Plugins
-    git clone https://github.com/esc/conda-zsh-completion $ohmyz_dir/plugins/conda-zsh-completion
+    newclone https://github.com/esc/conda-zsh-completion
+    newclone https://github.com/zsh-users/zsh-autosuggestions
+    ln -sfv $zsh_dir/plugins/* $ohmyz_dir/custom/plugins/
 }
 
-echo "Select version of zsh."
 while true; do
-    echo -n "(b)asic; (o)h-my-zsh; (g)rml: "
-    read z
-    case $z in
+    if [ -z $1 ]
+    then
+        echo "Select version of zsh."
+        echo -n "(b)asic; (o)h-my-zsh; (g)rml: "
+        read z
+        input=$z
+    else
+        input=$1
+    fi
+    case $input in
         "b"|"B"|"basic")
             echo "basic zsh selected."
             ln -sf $zsh_dir/basicrc $zshrc_path
@@ -46,9 +66,11 @@ while true; do
             break
             ;;
         *)
-            echo "Invalid option $z"
+            echo "Invalid option $input"
             continue
             ;;
     esac
 done
+
+
 
