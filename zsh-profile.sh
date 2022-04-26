@@ -3,7 +3,7 @@ zshenv_path=$HOME/.zshenv
 zsh_dir=$HOME/.config/zsh
 zshrc_path=$zsh_dir/.zshrc
 
-if [ ! -f $zshenv ] && [ ! -f $HOME/.profile ]
+if [ ! -f $zshenv_path ]
 then
     ln -sf $zsh_dir/zshenv $zshenv_path
 fi
