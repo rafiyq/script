@@ -1,6 +1,6 @@
 #!/bin/sh
-py=/usr/bin/python3
-ytdl_path=$HOME/.local/bin/yt-dlp
+py=""
+ytdl_path=yt-dlp
 #ytdl_addr=https://youtube-dl.org/downloads/latest/youtube-dl
 [ ! -f $ytdl_path ] && wget -O $ytdl_path $ytdl_addr
 
