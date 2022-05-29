@@ -7,27 +7,45 @@ ytdl_path=yt-dlp
 case $1 in
     "best")
         echo "best video(mp4) + best audio(m4a) + substitle"
-        $py $ytdl_path -f \
-            'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' \
-            --write-sub --write-auto-sub --sub-lang en,id \
-            --convert-subs=srt --embed-subs $2
+        $py $ytdl_path \
+            -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' \
+            --write-sub \
+            --write-auto-sub \
+            --sub-lang en \
+            --convert-subs=srt \
+            --embed-subs \
+            $2
         ;;
     "top")
         echo "best video + best audio + substitle"
-        $py $ytdl_path -f \
-            'bestvideo+bestaudio' --write-sub --write-auto-sub \
-            --sub-lang en,id --convert-subs=srt --embed-subs $2
+        $py $ytdl_path \
+            -f 'bestvideo+bestaudio' \
+            --write-sub \
+            --write-auto-sub \
+            --sub-lang en,id \
+            --convert-subs=srt \
+            --embed-subs \
+            $2
         ;;
     "music")
         echo "downloading music..."
-        $py $ytdl_path -o %\(track\)s\ -\ %\(artist\)s.%\(ext\)s \
-        -f bestaudio --extract-audio --audio-format mp3 --audio-quality 0 \
-        --embed-thumbnail --add-metadata --metadata-from-title %\(track\)s\ -\ %\(artist\)s \
+        $py $ytdl_path 
+        -o %\(track\)s\ -\ %\(artist\)s.%\(ext\)s \
+        -f bestaudio \
+        --extract-audio \
+        --audio-format mp3 \
+        --audio-quality 0 \
+        --embed-thumbnail \
+        --add-metadata \
+        --metadata-from-title %\(track\)s\ -\ %\(artist\)s \
         $2
         ;;
     "thumbnail")
         echo "Download thumbnail"
-        $py $ytdl_path --write-thumbnail --skip-download $2
+        $py $ytdl_path \
+        --write-thumbnail \
+        --skip-download \
+        $2
         ;;
     "update")
         echo "Updating youtube-dl..."
