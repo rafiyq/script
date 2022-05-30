@@ -1,5 +1,5 @@
 # Ignore everything
-*
+/*
 
 # But not these files...
 !addSrtDir.py
@@ -16,4 +16,5 @@
 !start-sway.sh
 !ytdl.sh
 !zsh-profile.sh
-!nautilus_scripts/*
+!/nautilus_scripts
+
