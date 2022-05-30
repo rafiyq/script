@@ -1,0 +1,32 @@
+#!/bin/bash -e
+
+# Allowed video and subtitle file extensions
+EXT_VIDEO=("mp4 avi mpg mov mkv wmv")
+EXT_SUB=("sub str srt vtt")
+
+FILE_LIST=($NAUTILUS_SCRIPT_SELECTED_FILE_PATHS)
+
+function get-filename {
+    for ((i=0; i<${#FILE_LIST[@]}; i++)); do
+        FILE_NAME="${FILE_LIST[$i]%.*}"
+        FILE_EXT="${FILE_LIST[$i]##*.}"
+
+        if [[ "${EXT_SUB[@]}" == *"$FILE_EXT"* ]]; then
+            SUB_NAME=$(basename -- "${FILE_LIST[$i]}")
+        elif [[ "${EXT_VIDEO[@]}" == *"$FILE_EXT"* ]]; then
+            VIDEO_NAME=$(basename -- "${FILE_LIST[$i]}")
+        else
+            notify-send "Error: Filename"
+        fi
+    done
+}
+
+if [ "${#FILE_LIST[@]}" -eq "2" ]; then
+    get-filename
+    addSrt.sh $VIDEO_NAME $SUB_NAME
+    notify-send "$VIDEO_NAME and $SUB_NAME have been merged successfully."
+else
+    notify-send "Error: the selected file must be 2"
+fi
+
+
