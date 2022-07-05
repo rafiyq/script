@@ -18,9 +18,16 @@ else
     subs=$2
 fi
 
-ffmpeg -i "$video" -f srt -i "$subs" -c:v copy -c:a copy -c:s mov_text -metadata:s:s:0 language=eng outfile.mp4
-gio trash "$video" "$subs"
-mv outfile.mp4 "$video"
+ffmpeg_bin=$(command -v ffmpeg)
+if [ ! -z "$ffmpeg_bin" ]
+then
+    $ffmpeg_bin -i "$video" -f srt -i "$subs" -c:v copy -c:a copy -c:s mov_text -metadata:s:s:0 language=eng outfile.mp4 && \
+    gio trash "$video" "$subs" && \
+    mv outfile.mp4 "$video"
+else
+    echo "ffmpeg isn't installed"
+    exit 1
+fi
 
 #echo "$video"
 #echo "$subs"
