@@ -1,21 +1,2 @@
-# Ignore everything
-/*
-
-# But not these files...
-!addSrtDir.py
-!addSrt.sh
-!custom_status.sh
-!emacsclient-server.sh
-!emacs-profile.sh
-!gcpp.sh
-!internet-speed-test.sh
-!LICENSE
-!rapikan_unduhan.py
-!README.md
-!speech-to-text.py
-!start-sway.sh
-!ytdl.sh
-!zsh-profile.sh
-!/nautilus_scripts
-!toogle-dock.sh
-
+kitty
+micromamba/*
