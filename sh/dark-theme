@@ -1,0 +1,10 @@
+#!/bin/sh
+
+cursor="Yaru-Purple"
+app_theme="Yaru-Purple-dark"
+shell_theme="Yaru-Purple"
+
+[ -n $cursor ] && gsettings set org.gnome.desktop.interface cursor-theme $cursor
+[ -n $app_theme ] && gsettings set org.gnome.desktop.interface gtk-theme $app_theme && gsettings set org.gnome.desktop.wm.preferences theme $app_theme
+[ -n $shell_theme ] && gsettings set org.gnome.shell.extensions.user-theme name $shell_theme
+
