@@ -1,0 +1,45 @@
+#!/bin/bash
+
+max_len=40
+max_dir_len=10
+trailing_dir=2
+max_leaf=4
+
+long_pwd=${PWD/$HOME/\~}
+IFS='/' read -ra array_pwd <<< "$long_pwd"
+
+declare -i max_char=$max_dir_len-1
+declare -i dir_end=${#array_pwd[@]}-$trailing_dir-1
+
+join () {
+  local IFS="$1"
+  shift
+  echo "$*"
+}
+
+if [ "${#long_pwd}" -gt "$max_len" ]; then
+  for i in "${!array_pwd[@]}"; do
+    dir_name=${array_pwd[$i]}
+    if [ "${#dir_name}" -gt "$max_dir_len" ]; then
+      substring=${dir_name:0:max_char}
+      substring+="…"
+      array_pwd[$i]=$substring
+    fi
+  done
+fi
+
+long_pwd_2=$(join / "${array_pwd[@]}")
+
+if [[ "${#long_pwd_2}" -gt "$max_len" || "${#array_pwd[@]}" -gt "$max_leaf" ]];
+then
+  for i in $(seq 0 $dir_end); do
+    dir_name=${array_pwd[$i]}
+    chars=${dir_name:0:1}
+    if [ "$chars" == '.' ]; then
+      chars=${dir_name:0:2}
+    fi
+    array_pwd[$i]=$chars
+  done
+fi
+
+echo $(join / "${array_pwd[@]}")
