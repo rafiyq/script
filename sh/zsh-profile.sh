@@ -49,6 +49,24 @@ ohmyzsh ()
     newtheme https://github.com/spaceship-prompt/spaceship-prompt
 }
 
+grml ()
+{
+    rm $zshrc_path
+    wget -O "$zshrc_path" https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+    if [ ! -f "$zshrc_path.local" ]; then
+        wget -O  "$zshrc_path.local" https://git.grml.org/f/grml-etc-core/etc/skel/.zshrc
+    else
+        echo "$zshrc_path.local exist!"
+    fi
+}
+
+plugins() {
+    plugins_dir="$zsh_dir/plugins"
+    wget -O "$plugins_dir/autosuggestions.zsh" https://raw.githubusercontent.com/zsh-users/zsh-autosuggestions/master/zsh-autosuggestions.zsh
+    wget -O "$plugins_dir/syntax-highlighting.zsh" https://raw.githubusercontent.com/zsh-users/zsh-syntax-highlighting/master/zsh-syntax-highlighting.zsh
+    wget -O "$plugins_dir/git.zsh" https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/plugins/git/git.plugin.zsh
+}
+
 while true; do
     if [ -z $1 ]
     then
@@ -73,9 +91,7 @@ while true; do
             ;;
         "g"|"G"|"grml")
             echo "grml selected."
-            rm $zshrc
-            wget -O $zshrc https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
-            wget -O $zshrc.local  https://git.grml.org/f/grml-etc-core/etc/skel/.zshrc
+            grml
             break
             ;;
         *)
@@ -84,6 +100,3 @@ while true; do
             ;;
     esac
 done
-
-
-
