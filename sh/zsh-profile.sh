@@ -40,13 +40,13 @@ ohmyzsh ()
 {
     ## Clone oh-my-zsh
     ohmyz_url="https://github.com/ohmyzsh/ohmyzsh.git"
-    ohmyz_dir=$HOME/.config/oh-my-zsh
+    ohmyz_dir=$zsh_dir/oh-my-zsh
     [ ! -d $ohmyz_dir ] && git clone $ohmyz_url $ohmyz_dir 
 
     ## Plugins
-    newplug https://github.com/esc/conda-zsh-completion
-    newplug https://github.com/zsh-users/zsh-autosuggestions
-    newtheme https://github.com/spaceship-prompt/spaceship-prompt
+    #newplug https://github.com/esc/conda-zsh-completion
+    #newplug https://github.com/zsh-users/zsh-autosuggestions
+    #newtheme https://github.com/spaceship-prompt/spaceship-prompt
 }
 
 grml ()
@@ -70,26 +70,28 @@ plugins() {
 while true; do
     if [ -z $1 ]
     then
-        echo "Select version of zsh."
-        echo -n "(b)asic; (o)h-my-zsh; (g)rml: "
+        echo "1. Basic"
+        echo "2. Oh-My-Zsh"
+        echo "3. grml"
+        echo -n "Select version of zsh: "
         read z
         input=$z
     else
         input=$1
     fi
     case $input in
-        "b"|"B"|"basic")
+        "1"|"B"|"basic")
             echo "basic zsh selected."
             ln -sf $zsh_dir/basicrc $zshrc_path
             break
             ;;
-        "o"|"O"|"ohmyzsh")
+        "2"|"O"|"ohmyzsh")
             echo "oh-my-zsh selected."
             ohmyzsh
             ln -sf $zsh_dir/ohmyzrc $zshrc_path
             break
             ;;
-        "g"|"G"|"grml")
+        "3"|"G"|"grml")
             echo "grml selected."
             grml
             break
