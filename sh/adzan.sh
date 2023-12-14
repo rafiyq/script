@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "===========================" >> $log_file
-log_file=/tmp/adzan_log
+log_file=/tmp/adzan.log
 is_interactive=false
 [ "$1" = "-i" ] && is_interactive=true
 echo "$(date) -> Menjalankan script adzan.sh" >> $log_file
