@@ -1,8 +1,10 @@
 #!/bin/bash
 
+echo "===========================" >> $log_file
 log_file=/tmp/adzan_log
 is_interactive=false
 [ "$1" = "-i" ] && is_interactive=true
+echo "$(date) -> Menjalankan script adzan.sh" >> $log_file
 
 play_mpv() {
     mpv --input-ipc-server=/tmp/mpvsocket \
@@ -36,7 +38,6 @@ adzan() {
     prayers_names=("Subuh" "Zuhur" "Asar" "Magrib" "Isya")
     prayers_idx=0
 
-    echo "\n$(date) -> Memulai adzan..." >> $log_file
     if $is_interactive; then
         date
     fi
@@ -63,7 +64,7 @@ adzan() {
                     echo "Menantikan waktu adzan $prayer_name pukul $prayer_time."
                 fi
                 sleep "$duration"
-                echo "$(date) -> Mengumandangkan adzan $prayer_name pukul $prayer_time ..." >> $log_file
+                echo "$(date) -> Mengumandangkan adzan $prayer_name" >> $log_file
                 if $is_interactive; then
                     echo "Mengumandangkan adzan $prayer_name pukul $prayer_time ..."
                 fi
@@ -89,7 +90,7 @@ adzan() {
         seconds_until_midnight=$((midnight_time - current_time))
         echo "$(date) -> Menanti pergantian hari." >> $log_file
         if $is_interactive; then
-            echo "Menanti pergantian hari."
+            echo "Sedang menanti hari $(date -d "tomorrow" +"%A, %d %B %Y")"
         fi
         sleep "$seconds_until_midnight"
         adzan
