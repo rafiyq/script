@@ -1,22 +1,39 @@
 #!/bin/bash
 
-echo "===========================" >> $log_file
+####### Set Variables ##########
 log_file=/tmp/adzan.log
+jadwal_shalat=~/Documents/jadwal-sholat.csv
+columns_names=("NO" "TANGGAL" "" "IMSAK" "SUBUH" "TERBIT" "DUHA" "ZUHUR" "ASAR" "MAGRIB" "ISYA")
+video_adzan=$HOME/Music/video_adzan.mp4
+audio_adzan=$HOME/Music/adzan.m4a
+audio_adzan_subuh=$HOME/Music/adzan_subuh.m4a
+################################    
+
+
+echo "===========================" >> $log_file
 is_interactive=false
 [ "$1" = "-i" ] && is_interactive=true
 echo "$(date) -> Menjalankan script adzan.sh" >> $log_file
 
 play_mpv() {
-    mpv --input-ipc-server=/tmp/mpvsocket \
+    audio_dur=$(ffprobe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:0 -of csv="p=0" $1 | awk '{printf "%.0f\n", $1}')
+    video_dur=$(ffprobe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:0 -of csv="p=0" $2 | awk '{printf "%.0f\n", $1}')
+    max_vid_dur=$((video_dur - audio_dur))
+    random_start_time=$((RANDOM % $max_vid_dur))
+
+    mpv --no-osc \
+        --input-ipc-server=/tmp/mpvsocket \
         --no-input-default-bindings \
         --input-conf=- \
-        --length=180 \
+        --length=$audio_dur \
         --volume=100 \
         --autofit=70% \
         --geometry=50%:50% \
         --no-border \
         --no-window-dragging \
         --audio-file=$1 \
+        --start=$random_start_time \
+        --audio-delay=$random_start_time \
         $2 <<EOF
     # Enable volume control using mouse wheel
     UP add volume 2
@@ -29,17 +46,21 @@ EOF
 }
 
 adzan() {
-    file=~/Documents/jadwal-sholat.csv
-    columns_names=("NO" "TANGGAL" "" "IMSAK" "SUBUH" "TERBIT" "DUHA" "ZUHUR" "ASAR" "MAGRIB" "ISYA")
-    
     today=$(date '+%d/%m/%Y')
-    my_string=$(grep $today $file)
-    #my_string="7|Kamis, 07/12/2023||03:39|03:49|05:09|05:38|11:15|11:31|11:52|12:01"
+    my_string=$(grep $today $jadwal_shalat)
     prayers_names=("Subuh" "Zuhur" "Asar" "Magrib" "Isya")
     prayers_idx=0
 
     if $is_interactive; then
+        echo "Memjalankan script adzan.sh secara interaktif"
         date
+    fi
+
+    if [ -z "$my_string" ]; then
+        echo "$(date) -> Jadwal shalat tidak tersedia, perbarui jadwal di https://bimasislam.kemenag.go.id/jadwalshalat." >> $log_file
+        if $is_interactive; then
+            echo "Jadwal shalat tidak tersedia, perbarui jadwal di https://bimasislam.kemenag.go.id/jadwalshalat"
+        fi
     fi
     
     IFS='|' read -r -a my_array <<< "$my_string"
@@ -69,9 +90,9 @@ adzan() {
                     echo "Mengumandangkan adzan $prayer_name pukul $prayer_time ..."
                 fi
                 if [ "$prayer_name" = "Subuh" ]; then
-                    play_mpv $HOME/Music/adzan_subuh.m4a $HOME/Downloads/video.mp4
+                    play_mpv $audio_adzan_subuh $video_adzan
                 else
-                    play_mpv $HOME/Music/adzan.m4a $HOME/Downloads/video.mp4
+                    play_mpv $audio_adzan $video_adzan
                 fi
     
             else
@@ -100,3 +121,4 @@ adzan() {
 }
 
 adzan
+#play_mpv $audio_adzan_subuh $video_adzan
