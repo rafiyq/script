@@ -52,7 +52,8 @@ function Image-ToWebP {
         } else {
             Write-Verbose "Converting $FilePath to $outputFile with quality $Quality"
             Write-Host "Converting: $FilePath -> $outputFile"
-            & $CwebpPath -q $Quality "`"$FilePath`"" -o "`"$outputFile`""
+            #& $CwebpPath -q $Quality "`"$FilePath`"" -o "`"$outputFile`""
+            & $CwebpPath -q $Quality $FilePath -o $outputFile
         }
     } else {
         Write-Verbose "Skipping unsupported file type: $FilePath"
