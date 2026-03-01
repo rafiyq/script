@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Function to log messages
+log() {
+  echo -e "[\033[0;32mINFO\033[0m] $1"
+}
+
+# Function to check for required tools
+check_deps() {
+  local deps=("curl" "bash" "sh")
+  for dep in "${deps[@]}"; do
+    if ! command -v "$dep" &> /dev/null; then
+      echo "Error: $dep is not installed." >&2
+      exit 1
+    fi
+  done
+}
+
+# Install NVM
+install_nvm() {
+  if [ -d "$HOME/.nvm" ]; then
+    log "NVM already installed. Skipping..."
+  else
+    log "Installing NVM..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/refs/heads/master/install.sh | bash
+  fi
+}
+
+# Install SDKMAN
+install_sdkman() {
+  if [ -d "$HOME/.sdkman" ]; then
+    log "SDKMAN already installed. Skipping..."
+  else
+    log "Installing SDKMAN..."
+    curl -s "https://get.sdkman.io" | bash
+    # Source SDKMAN for the current session to verify
+    export SDKMAN_DIR="$HOME/.sdkman"
+    [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+    sdk version
+  fi
+}
+
+# Install Rustup
+install_rust() {
+  if command -v rustup &> /dev/null; then
+    log "Rustup already installed. Skipping..."
+  else
+    log "Installing Rustup..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  fi
+}
+
+# Main execution
+main() {
+  check_deps
+  
+  install_nvm
+  install_sdkman
+  install_rust
+  
+  log "Environment setup complete!"
+  log "Note: You may need to restart your terminal or source your profile to use the new tools."
+}
+
+main "$@"
