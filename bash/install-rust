@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+log() { echo -e "[\033[0;32mINFO\033[0m] $1"; }
+error() { echo -e "[\033[0;31mERROR\033[0m] $1" >&2; }
+
+# Robust check for Rustup
+if command -v rustup &> /dev/null || [ -d "$HOME/.rustup" ]; then
+  log "Rustup already installed. Skipping..."
+else
+  log "Installing Rustup..."
+  curl --proto '=https' --sv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+fi
+
+if [ -f "$HOME/.cargo/env" ]; then
+  source "$HOME/.cargo/env"
+  log "$(rustc --version) installed successfully."
+else
+  error "Rustup installation failed."
+  exit 1
+fi

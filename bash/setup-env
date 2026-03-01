@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Function to log messages
 log() {
   echo -e "[\033[0;32mINFO\033[0m] $1"
@@ -18,50 +21,78 @@ check_deps() {
   done
 }
 
-# Install NVM
-install_nvm() {
-  if [ -d "$HOME/.nvm" ]; then
-    log "NVM already installed. Skipping..."
-  else
-    log "Installing NVM..."
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/refs/heads/master/install.sh | bash
+# Robust checks for current status
+is_nvm_installed() { [ -d "$HOME/.nvm" ] || command -v nvm &> /dev/null || [ -n "${NVM_DIR:-}" ]; }
+is_sdkman_installed() { [ -d "$HOME/.sdkman" ] || command -v sdk &> /dev/null || [ -n "${SDKMAN_DIR:-}" ]; }
+is_rust_installed() { command -v rustup &> /dev/null || [ -d "$HOME/.rustup" ]; }
+
+# Source profile for the current shell
+source_profile() {
+  local shell_type
+  shell_type=$(basename "$SHELL")
+  local profile=""
+  
+  case $shell_type in
+    bash)
+      if [ -f "$HOME/.bashrc" ]; then profile="$HOME/.bashrc";
+      elif [ -f "$HOME/.bash_profile" ]; then profile="$HOME/.bash_profile"; fi
+      ;;
+    zsh)
+      if [ -f "$HOME/.zshrc" ]; then profile="$HOME/.zshrc"; fi
+      ;;
+    *)
+      log "Unknown shell: $shell_type. Please manually source your profile."
+      return
+      ;;
+  esac
+  
+  if [ -n "$profile" ]; then
+    log "Sourcing $profile..."
+    source "$profile"
   fi
 }
 
-# Install SDKMAN
-install_sdkman() {
-  if [ -d "$HOME/.sdkman" ]; then
-    log "SDKMAN already installed. Skipping..."
-  else
-    log "Installing SDKMAN..."
-    curl -s "https://get.sdkman.io" | bash
-    # Source SDKMAN for the current session to verify
-    export SDKMAN_DIR="$HOME/.sdkman"
-    [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
-    sdk version
-  fi
-}
+# Menu for selecting packages
+select_packages() {
+  echo "Select packages to install (separate multiple choices with spaces, e.g., '1 3'):"
+  
+  local nvm_status="[ ]"
+  local sdkman_status="[ ]"
+  local rust_status="[ ]"
+  
+  is_nvm_installed && nvm_status="[\033[0;32mINSTALLED\033[0m]"
+  is_sdkman_installed && sdkman_status="[\033[0;32mINSTALLED\033[0m]"
+  is_rust_installed && rust_status="[\033[0;32mINSTALLED\033[0m]"
 
-# Install Rustup
-install_rust() {
-  if command -v rustup &> /dev/null; then
-    log "Rustup already installed. Skipping..."
-  else
-    log "Installing Rustup..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  fi
+  echo -e "1) NVM     $nvm_status"
+  echo -e "2) SDKMAN  $sdkman_status"
+  echo -e "3) Rustup  $rust_status"
+  echo "4) All"
+  echo "5) Exit"
+  
+  read -r -p "Your choice: " choices
+  
+  for choice in $choices; do
+    case $choice in
+      1) "$SCRIPT_DIR/install-nvm" ;;
+      2) "$SCRIPT_DIR/install-sdkman" ;;
+      3) "$SCRIPT_DIR/install-rust" ;;
+      4) "$SCRIPT_DIR/install-nvm"; "$SCRIPT_DIR/install-sdkman"; "$SCRIPT_DIR/install-rust" ;;
+      5) log "Exiting."; exit 0 ;;
+      *) echo "Invalid choice: $choice" ;;
+    esac
+  done
 }
 
 # Main execution
 main() {
   check_deps
+  select_packages
   
-  install_nvm
-  install_sdkman
-  install_rust
+  source_profile
   
-  log "Environment setup complete!"
-  log "Note: You may need to restart your terminal or source your profile to use the new tools."
+  log "Environment setup check complete!"
+  log "Note: To apply changes to your current shell, please run: source <your-profile>"
 }
 
 main "$@"

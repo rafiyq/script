@@ -3,91 +3,80 @@
 set -euo pipefail
 
 # Configuration
-INSTALL_DIR="/opt"
-BIN_LINK_PATH="/usr/local/bin/nvim"
+INSTALL_BASE="/opt"
+BIN_DIR="/usr/local/bin"
 NVIM_RELEASE_URL="https://github.com/neovim/neovim/releases/latest/download"
 
-# Function to log messages
-log() {
-  echo -e "[\033[0;32mINFO\033[0m] $1"
-}
+# Logging functions
+log() { echo -e "[\033[0;32mINFO\033[0m] $1"; }
+error() { echo -e "[\033[0;31mERROR\033[0m] $1" >&2; exit 1; }
 
-# Function to log errors
-error() {
-  echo -e "[\033[0;31mERROR\033[0m] $1" >&2
-  exit 1
-}
+# Check dependencies
+for dep in curl tar uname sed tr sudo mktemp; do
+  if ! command -v "$dep" &>/dev/null; then
+    error "Required tool '$dep' is not installed."
+  fi
+done
 
-# Function to check for required dependencies
-check_dependencies() {
-  local deps=("curl" "tar" "uname" "sed" "tr" "sudo" "mktemp")
-  for dep in "${deps[@]}"; do
-    if ! command -v "$dep" &> /dev/null; then
-      error "Required tool '$dep' is not installed."
+# Detect Checksum Tool
+if command -v sha256sum &>/dev/null; then
+  CHECK_CMD="sha256sum --check --status"
+elif command -v shasum &>/dev/null; then
+  CHECK_CMD="shasum -a 256 --check --status"
+else
+  log "Warning: Neither 'sha256sum' nor 'shasum' found. Skipping checksum verification."
+  CHECK_CMD=""
+fi
+
+# Detect OS and Architecture
+os_name=$(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin/macos/')
+arch_name=$(uname -m | sed 's/aarch64/arm64/')
+
+if [[ "$os_name" != "linux" && "$os_name" != "macos" ]]; then
+  error "Unsupported OS: $os_name"
+fi
+
+if [[ "$arch_name" != "x86_64" && "$arch_name" != "arm64" ]]; then
+  error "Unsupported architecture: $arch_name"
+fi
+
+nvim_pkg="nvim-${os_name}-${arch_name}"
+nvim_tarball="${nvim_pkg}.tar.gz"
+checksum_file="${nvim_tarball}.sha256sum"
+
+# Download and Verify
+temp_dir=$(mktemp -d)
+trap 'rm -rf "$temp_dir"' EXIT
+
+log "Downloading Neovim: ${nvim_pkg}..."
+if ! curl -L -o "${temp_dir}/${nvim_tarball}" "${NVIM_RELEASE_URL}/${nvim_tarball}"; then
+  error "Failed to download Neovim from ${NVIM_RELEASE_URL}/${nvim_tarball}"
+fi
+
+if [[ -n "$CHECK_CMD" ]]; then
+  log "Verifying checksum..."
+  if curl -L -s -o "${temp_dir}/${checksum_file}" "${NVIM_RELEASE_URL}/${checksum_file}"; then
+    if ! (cd "$temp_dir" && $CHECK_CMD "$checksum_file"); then
+      error "Checksum verification failed! The downloaded file may be corrupted."
     fi
-  done
-}
-
-# Function to detect OS and Architecture
-detect_platform() {
-  local os_name
-  os_name=$(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin/macos/')
-  
-  local arch_name
-  arch_name=$(uname -m | sed 's/aarch64/arm64/')
-  
-  if [[ "$os_name" != "linux" && "$os_name" != "macos" ]]; then
-    error "Unsupported OS: $os_name"
-  fi
-  
-  if [[ "$arch_name" != "x86_64" && "$arch_name" != "arm64" ]]; then
-    error "Unsupported architecture: $arch_name"
-  fi
-  
-  echo "nvim-${os_name}-${arch_name}"
-}
-
-# Function to install Neovim
-install_nvim() {
-  local nvim_pkg_name="$1"
-  local nvim_tarball="${nvim_pkg_name}.tar.gz"
-  local temp_dir
-  temp_dir=$(mktemp -d)
-  
-  # Ensure cleanup on exit
-  trap 'rm -rf "$temp_dir"' EXIT
-  
-  log "Downloading Neovim: ${nvim_pkg_name}..."
-  if ! curl -L -o "${temp_dir}/${nvim_tarball}" "${NVIM_RELEASE_URL}/${nvim_tarball}"; then
-    error "Failed to download Neovim from ${NVIM_RELEASE_URL}/${nvim_tarball}"
-  fi
-  
-  log "Extracting Neovim to ${INSTALL_DIR}..."
-  sudo rm -rf "${INSTALL_DIR}/${nvim_pkg_name}"
-  if ! sudo tar -C "${INSTALL_DIR}" -xzf "${temp_dir}/${nvim_tarball}"; then
-    error "Failed to extract Neovim to ${INSTALL_DIR}"
-  fi
-  
-  log "Creating symbolic link at ${BIN_LINK_PATH}..."
-  sudo ln -sf "${INSTALL_DIR}/${nvim_pkg_name}/bin/nvim" "${BIN_LINK_PATH}"
-}
-
-# Main execution
-main() {
-  check_dependencies
-  
-  local nvim_pkg
-  nvim_pkg=$(detect_platform)
-  
-  install_nvim "$nvim_pkg"
-  
-  log "Neovim installation complete."
-  log "Verifying installation:"
-  if command -v nvim &> /dev/null; then
-    nvim --version | head -n 1
+    log "Checksum verified."
   else
-    error "Neovim binary not found in PATH."
+    log "Warning: Could not download checksum file. Skipping verification."
   fi
-}
+fi
 
-main "$@"
+# Extract and Install
+log "Extracting Neovim to ${INSTALL_BASE}..."
+sudo rm -rf "${INSTALL_BASE}/${nvim_pkg}"
+if ! sudo tar -C "${INSTALL_BASE}" -xzf "${temp_dir}/${nvim_tarball}"; then
+  error "Failed to extract Neovim to ${INSTALL_BASE}"
+fi
+
+log "Creating symbolic link at ${BIN_DIR}/nvim..."
+sudo ln -sf "${INSTALL_BASE}/${nvim_pkg}/bin/nvim" "${BIN_DIR}/nvim"
+
+if command -v nvim &>/dev/null; then
+  log "$(nvim --version | head -n 1) installed successfully."
+else
+  error "Neovim installation failed. Binary not found in PATH."
+fi

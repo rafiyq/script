@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+log() { echo -e "[\033[0;32mINFO\033[0m] $1"; }
+error() { echo -e "[\033[0;31mERROR\033[0m] $1" >&2; }
+
+# Robust check for SDKMAN
+if [ -d "$HOME/.sdkman" ] || command -v sdk &> /dev/null || [ -n "${SDKMAN_DIR:-}" ]; then
+  log "SDKMAN already installed. Skipping..."
+else
+  log "Installing SDKMAN..."
+  curl -s "https://get.sdkman.io" | bash
+fi
+
+export SDKMAN_DIR="$HOME/.sdkman"
+if [ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]; then
+  source "$SDKMAN_DIR/bin/sdkman-init.sh"
+  log "$(sdk version | head -n 1) installed successfully."
+else
+  error "SDKMAN installation failed."
+  exit 1
+fi
