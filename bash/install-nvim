@@ -42,7 +42,7 @@ fi
 
 nvim_pkg="nvim-${os_name}-${arch_name}"
 nvim_tarball="${nvim_pkg}.tar.gz"
-checksum_file="${nvim_tarball}.sha256sum"
+checksum_file="shasum.txt"
 
 # Download and Verify
 temp_dir=$(mktemp -d)
@@ -55,8 +55,9 @@ fi
 
 if [[ -n "$CHECK_CMD" ]]; then
   log "Verifying checksum..."
-  if curl -L -s -o "${temp_dir}/${checksum_file}" "${NVIM_RELEASE_URL}/${checksum_file}"; then
-    if ! (cd "$temp_dir" && $CHECK_CMD "$checksum_file"); then
+  # Use -f to fail if the file is not found (404)
+  if curl -L -f -s -o "${temp_dir}/${checksum_file}" "${NVIM_RELEASE_URL}/${checksum_file}"; then
+    if ! (cd "$temp_dir" && grep "${nvim_tarball}" "${checksum_file}" | $CHECK_CMD); then
       error "Checksum verification failed! The downloaded file may be corrupted."
     fi
     log "Checksum verified."
