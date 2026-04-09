@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# --- Configuration ---
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+STATUS_FILE="$CACHE_DIR/touchpad.status"
+
+# --- Dependency Check ---
+for cmd in hyprctl jq notify-send; do
+    if ! command -v "$cmd" &> /dev/null; then
+        echo "Error: Required command '$cmd' is not installed." >&2
+        exit 1
+    fi
+done
+
+# --- Initialization ---
+mkdir -p "$CACHE_DIR"
+
+# Find the touchpad device name dynamically
+TOUCHPAD_NAME=$(hyprctl -j devices | jq -r '(.mice // []) + (.touchpads // []) | map(select(.name | test("touchpad"; "i"))) | .[0].name // empty')
+
+if [ -z "$TOUCHPAD_NAME" ]; then
+    notify-send -u critical "Touchpad Error" "Could not find a touchpad device."
+    exit 1
+fi
+
+# --- Functions ---
+# Combined function to handle both enabling and disabling
+set_touchpad_state() {
+    local target_state=$1
+    local msg_state="Enabled"
+
+    if [ "$target_state" = "false" ]; then
+        msg_state="Disabled"
+    fi
+
+    # Update state file, apply to Hyprland, and notify
+    printf "%s" "$target_state" > "$STATUS_FILE"
+    hyprctl keyword "device[$TOUCHPAD_NAME]:enabled" "$target_state" > /dev/null
+    notify-send -t 2000 "Touchpad $msg_state"
+}
+
+# --- Main Logic ---
+# Default to "true" (so the first run disables it) if the file doesn't exist
+CURRENT_STATE="true"
+
+if [ -f "$STATUS_FILE" ]; then
+    CURRENT_STATE=$(cat "$STATUS_FILE")
+fi
+
+# Toggle the state
+if [ "$CURRENT_STATE" = "true" ]; then
+    set_touchpad_state "false"
+else
+    set_touchpad_state "true"
+fi
