@@ -13,7 +13,7 @@ audio_adzan_subuh=$HOME/Music/adzan_subuh.m4a
 echo "===========================" >> $log_file
 is_interactive=false
 [ "$1" = "-i" ] && is_interactive=true
-echo "$(date) -> Menjalankan script adzan.sh" >> $log_file
+echo "$(date) -> Starting adzan.sh" >> $log_file
 
 play_mpv() {
     audio_dur=$(ffprobe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:0 -of csv="p=0" $1 | awk '{printf "%.0f\n", $1}')
@@ -52,14 +52,14 @@ adzan() {
     prayers_idx=0
 
     if $is_interactive; then
-        echo "Memjalankan script adzan.sh secara interaktif"
+        echo "Running adzan.sh in interactive mode"
         date
     fi
 
     if [ -z "$my_string" ]; then
-        echo "$(date) -> Jadwal shalat tidak tersedia, perbarui jadwal di https://bimasislam.kemenag.go.id/jadwalshalat." >> $log_file
+        echo "$(date) -> Prayer schedule not available, update it at https://bimasislam.kemenag.go.id/jadwalshalat." >> $log_file
         if $is_interactive; then
-            echo "Jadwal shalat tidak tersedia, perbarui jadwal di https://bimasislam.kemenag.go.id/jadwalshalat"
+            echo "Prayer schedule not available, update it at https://bimasislam.kemenag.go.id/jadwalshalat"
         fi
     fi
     
@@ -80,14 +80,14 @@ adzan() {
             # Check if the prayer time is in the future
             if [ "$duration" -gt 0 ]; then
 
-                echo "$(date) -> Menantikan waktu adzan $prayer_name pukul $prayer_time." >> $log_file
+                echo "$(date) -> Waiting for the $prayer_name prayer at $prayer_time." >> $log_file
                 if $is_interactive; then
-                    echo "Menantikan waktu adzan $prayer_name pukul $prayer_time."
+                    echo "Waiting for the $prayer_name prayer at $prayer_time."
                 fi
                 sleep "$duration"
-                echo "$(date) -> Mengumandangkan adzan $prayer_name" >> $log_file
+                echo "$(date) -> Calling the adhan for $prayer_name" >> $log_file
                 if $is_interactive; then
-                    echo "Mengumandangkan adzan $prayer_name pukul $prayer_time ..."
+                    echo "Calling the adhan for $prayer_name at $prayer_time ..."
                 fi
                 if [ "$prayer_name" = "Subuh" ]; then
                     play_mpv $audio_adzan_subuh $video_adzan
@@ -96,9 +96,9 @@ adzan() {
                 fi
     
             else
-                echo "$(date) -> Adzan $prayer_name telah berkumandang pukul $prayer_time." >> $log_file
+                echo "$(date) -> The $prayer_name prayer already passed at $prayer_time." >> $log_file
                 if $is_interactive; then
-                    echo "Adzan $prayer_name telah berkumandang pukul $prayer_time."
+                    echo "The $prayer_name prayer already passed at $prayer_time."
                 fi
             fi
        fi
@@ -109,9 +109,9 @@ adzan() {
         current_time=$(date +%s)
         midnight_time=$(date -d "tomorrow 00:00:00" +%s)
         seconds_until_midnight=$((midnight_time - current_time))
-        echo "$(date) -> Menanti pergantian hari." >> $log_file
+        echo "$(date) -> Waiting for the next day." >> $log_file
         if $is_interactive; then
-            echo "Sedang menanti hari $(date -d "tomorrow" +"%A, %d %B %Y")"
+            echo "Waiting for $(date -d "tomorrow" +"%A, %d %B %Y")"
         fi
         sleep "$seconds_until_midnight"
         adzan

@@ -6,7 +6,7 @@ ytdl_path=yt-dlp
 
 case $1 in
     "best")
-        echo "best video(mp4) + best audio(m4a) + substitle"
+        echo "best video(mp4) + best audio(m4a) + subtitle"
         $py $ytdl_path \
             -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' \
             --write-sub \
@@ -17,7 +17,7 @@ case $1 in
             $2
         ;;
     "top")
-        echo "best video + best audio + substitle"
+        echo "best video + best audio + subtitle"
         $py $ytdl_path \
             -f 'bestvideo+bestaudio' \
             --write-sub \

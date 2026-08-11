@@ -6,7 +6,7 @@ function Best {
         $Arguments
     )
 
-    Write-Output "best video(mp4) + best audio(m4a) + substitle"
+    Write-Output "best video(mp4) + best audio(m4a) + subtitle"
     Write-Output "URL: $Video_URL"
     yt-dlp `
     -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' `
@@ -21,7 +21,7 @@ function Top {
         $Arguments
     )
 
-    Write-Output "best video + best audio + substitle"
+    Write-Output "best video + best audio + subtitle"
     Write-Output "URL: $Video_URL"
     yt-dlp `
     -f 'bestvideo+bestaudio' `

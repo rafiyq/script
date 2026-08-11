@@ -24,13 +24,13 @@
         -Category NotInstalled
     }
 }
-function Is-Video-Or-Subtile {
+function Is-Video-Or-Subtitle {
     param (
         $File
     )
 
     $VideoExtension = "mp4", "avi", "mpg", "mov", "mkv", "wmv"
-    $SubtitleExtension = "sub", "str", "srt", "vtt"
+    $SubtitleExtension = "sub", "srt", "vtt"
     foreach ($FileName in $VideoExtension) {
         if ($File -match ".$Extension$") {
             return "Video"
@@ -44,8 +44,8 @@ function Is-Video-Or-Subtile {
 }
 
 function main {
-    if (Is-Video-Or-Subtile($arg[0]) == "Video") {$VideoFile = $args[0]}
-    if (Is-Video-Or-Subtile($arg[1]) == "Subtitle") {$SubtitleFile = $args[1]}
+    if (Is-Video-Or-Subtitle($arg[0]) == "Video") {$VideoFile = $args[0]}
+    if (Is-Video-Or-Subtitle($arg[1]) == "Subtitle") {$SubtitleFile = $args[1]}
 
     if (($VideoFile -ne $null) -and ($SubtitleFile -ne $null)) {
         Merge-Subtitle $VideoFile $SubtitleFile

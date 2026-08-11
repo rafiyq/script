@@ -1,0 +1,116 @@
+#!/usr/bin/sh
+# Control pipewire or pulseaudio volume with pactl.
+# Displays a notification with the current state if /usr/bin/notify-send is available
+#
+# Volume increase/decrease step can be customized by setting the `$volume_step`
+# variable to a numeric value before including the file.
+# Maximum volume boost level can be set with the `$volume_limit` variable.
+#
+# Requires:     pulseaudio-utils
+# Recommends:   libnotify
+
+if ! command -v pactl >/dev/null; then
+  exit 0
+fi
+
+# pactl output depends on the current locale
+export LANG=C.UTF-8 LC_ALL=C.UTF-8
+
+DEFAULT_STEP=5
+LIMIT=${LIMIT:-100}
+SINK="@DEFAULT_SINK@"
+
+# Detect the desktop/window manager dynamically (e.g. sway, i3, GNOME, KDE).
+# Fall back to the default name 'volume-control' if none is detected.
+APP_NAME="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-volume-control}}"
+# Lowercase the app name for a consistent format
+APP_NAME=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]')
+clamp() {
+  if [ "$1" -lt 0 ]; then
+    echo "0"
+  elif [ "$1" -gt "$LIMIT" ]; then
+    echo "$LIMIT"
+  else
+    echo "$1"
+  fi
+}
+
+get_sink_volume() {
+  local target_sink="$1"
+  if [ "$target_sink" = "@DEFAULT_SINK@" ]; then
+    target_sink=$(pactl get-default-sink 2>/dev/null || echo "@DEFAULT_SINK@")
+  fi
+
+  local volume_raw
+  volume_raw=$(pactl get-sink-volume "$target_sink" 2>/dev/null | grep -Po '\d+(?=%)' | head -n 1)
+  echo "${volume_raw:-0}"
+}
+
+CHANGE=0
+VOLUME=-1
+
+while true; do
+  case $1 in
+  --sink)
+    if [ "$2" = "running" ]; then
+      # Mencari sink yang berstatus RUNNING, jika tidak ada kembali ke default
+      RUNNING_SINK=$(pactl list short sinks | grep 'RUNNING' | awk '{print $2}' | head -n 1)
+      SINK="${RUNNING_SINK:-@DEFAULT_SINK@}"
+    else
+      SINK=${2:-$SINK}
+    fi
+    shift
+    ;;
+  -l | --limit)
+    LIMIT=$((${2:-$LIMIT}))
+    shift
+    ;;
+  --set-volume)
+    VOLUME=$(($2))
+    shift
+    ;;
+  -i | --increase)
+    CHANGE=$((${2:-$DEFAULT_STEP}))
+    shift
+    ;;
+  -d | --decrease)
+    CHANGE=$((-${2:-$DEFAULT_STEP}))
+    shift
+    ;;
+  *)
+    break
+    ;;
+  esac
+  shift
+done
+
+if [ "$CHANGE" -ne 0 ]; then
+  VOLUME=$(get_sink_volume "$SINK")
+  VOLUME=$((VOLUME + CHANGE))
+  pactl set-sink-volume "$SINK" "$(clamp "$VOLUME")%"
+elif [ "$VOLUME" -ge 0 ]; then
+  pactl set-sink-volume "$SINK" "$(clamp "$VOLUME")%"
+fi
+
+# Display desktop notification
+
+if ! command -v notify-send >/dev/null; then
+  exit 0
+fi
+
+VOLUME=$(get_sink_volume "$SINK")
+TEXT="Volume: ${VOLUME}%"
+case $(pactl get-sink-mute "$SINK") in
+*yes)
+  TEXT="Volume: muted"
+  VOLUME=0
+  ;;
+esac
+
+notify-send \
+  --app-name "${APP_NAME}" \
+  --expire-time 800 \
+  --hint string:x-canonical-private-synchronous:volume \
+  --hint "int:value:$VOLUME" \
+  --transient \
+  "${TEXT}"

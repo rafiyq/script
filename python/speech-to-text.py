@@ -1,20 +1,31 @@
 import json
-from os.path import join, dirname
+import os
+import sys
 from ibm_watson import SpeechToTextV1
 from ibm_watson.websocket import RecognizeCallback, AudioSource
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
-apiKey = 'QW83BoRhgsyCZP642USpLHniFqah95JQ2GHzo81DHN6X'
-url = 'https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/1edcc5fe-3dc4-4a51-a65e-cedc3ea0248a'
+api_key = os.environ.get("IBM_WATSON_API_KEY")
+if not api_key:
+    sys.exit("Error: set the IBM_WATSON_API_KEY environment variable")
 
-authenticator = IAMAuthenticator(apiKey)
-speech_to_text = SpeechToTextV1(
-    authenticator=authenticator
+url = os.environ.get(
+    "IBM_WATSON_URL",
+    "https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/1edcc5fe-3dc4-4a51-a65e-cedc3ea0248a",
 )
+
+audio_path = os.environ.get("IBM_WATSON_AUDIO_FILE")
+if not audio_path:
+    audio_path = sys.argv[1] if len(sys.argv) > 1 else None
+if not audio_path:
+    sys.exit("Usage: speech-to-text.py <audio-file>")
+
+authenticator = IAMAuthenticator(api_key)
+speech_to_text = SpeechToTextV1(authenticator=authenticator)
 
 speech_to_text.set_service_url(url)
 
-speech_to_text.set_default_headers({'x-watson-learning-opt-out': "true"})
+speech_to_text.set_default_headers({"x-watson-learning-opt-out": "true"})
 
 
 class MyRecognizeCallback(RecognizeCallback):
@@ -23,26 +34,26 @@ class MyRecognizeCallback(RecognizeCallback):
 
     def on_data(self, data):
         print(json.dumps(data, indent=2))
-        with open('output.txt', 'w') as file_output:
+        with open("output.txt", "w") as file_output:
             file_output.write(json.dumps(data, indent=2))
 
     def on_error(self, error):
-        print('Error received: {}'.format(error))
+        print("Error received: {}".format(error))
 
     def on_inactivity_timeout(self, error):
-        print('Inactivity timeout: {}'.format(error))
+        print("Inactivity timeout: {}".format(error))
 
 
 myRecognizeCallback = MyRecognizeCallback()
 
-with open(join(dirname(__file__), '/home/rafiyq/Downloads/', 'mimk-084-1stHalf.mp3'), 'rb') as audio_file:
+with open(audio_path, "rb") as audio_file:
     audio_source = AudioSource(audio_file)
     speech_to_text.recognize_using_websocket(
         audio=audio_source,
-        content_type='audio/mp3',
+        content_type="audio/mp3",
         recognize_callback=myRecognizeCallback,
-        model='ja-JP_BroadbandModel',
-        # keywords=['colorado', 'tornado', 'tornadoes'],
+        model="ja-JP_BroadbandModel",
+        # keywords=["colorado", "tornado", "tornadoes"],
         # keywords_threshold=0.5,
         # timestamps=True
         speaker_labels=True
